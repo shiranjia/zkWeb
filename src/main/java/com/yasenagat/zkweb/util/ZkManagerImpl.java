@@ -1,21 +1,18 @@
 package com.yasenagat.zkweb.util;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
-import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooDefs.Perms;
+import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Stat;
+import org.h2.util.StringUtils;
+
+import java.util.*;
 
 public class ZkManagerImpl implements Watcher,ZkManager {
 
@@ -115,7 +112,7 @@ public class ZkManagerImpl implements Watcher,ZkManager {
 		return new ArrayList<String>();
 	}
 
-	public String getData(String path) {
+	public String getData(String path,String charset) {
 		try {
 			Stat s = zk.exists(path, false);
 			if (s != null) {
@@ -123,8 +120,11 @@ public class ZkManagerImpl implements Watcher,ZkManager {
 				if(null == b){
 					return "";
 				}
-				log.info("data : "+new String(zk.getData(path, false, s)));
-				return new String(zk.getData(path, false, s));
+				if(StringUtils.isNullOrEmpty(charset)){
+					charset = "UTF-8";
+				}
+				log.info("data : "+new String(zk.getData(path, false, s),charset));
+				return new String(zk.getData(path, false, s), charset);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

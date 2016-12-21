@@ -15,14 +15,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.yasenagat.zkweb.model.Tree;
 import com.yasenagat.zkweb.model.TreeRoot;
 import com.yasenagat.zkweb.util.ZkCache;
-import com.yasenagat.zkweb.util.ZkManagerImpl;
 
 @Controller
 @RequestMapping("/zk")
 public class ZkController {
 	
 	private static final Logger log = LoggerFactory.getLogger(ZkController.class);
-	
+
+	private String charset = "UTF-8";
+
 	@RequestMapping(value="/queryZnodeInfo",produces="text/html;charset=UTF-8")
 	public String queryzNodeInfo(
 			@RequestParam(required=false) String path,
@@ -31,10 +32,10 @@ public class ZkController {
 			){
 		
 		try {
-			path = URLDecoder.decode(path,"utf-8");
+			path = URLDecoder.decode(path,charset);
 			log.info("queryzNodeInfo : " + path);
 			if(path != null){
-				model.addAttribute("data", ZkCache.get(cacheId).getData(path));
+				model.addAttribute("data", ZkCache.get(cacheId).getData(path,charset));
 				model.mergeAttributes(ZkCache.get(cacheId).getNodeMeta(path));
 				model.addAttribute("acls", ZkCache.get(cacheId).getACLs(path));
 				model.addAttribute("path",path);

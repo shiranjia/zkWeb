@@ -14,7 +14,7 @@ public interface ZkManager {
 
 	public List<String> getChildren(String path);
 
-	public String getData(String path);
+	public String getData(String path,String charset);
 
 	public Map<String, String> getNodeMeta(String nodePath);
 
