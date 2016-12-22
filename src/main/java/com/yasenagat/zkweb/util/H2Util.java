@@ -1,3 +1,4 @@
+/*
 package com.yasenagat.zkweb.util;
 
 import java.sql.ResultSet;
@@ -84,3 +85,4 @@ public class H2Util {
 	
 	
 }
+*/

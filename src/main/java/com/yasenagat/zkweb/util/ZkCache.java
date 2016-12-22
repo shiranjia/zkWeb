@@ -13,6 +13,10 @@ public class ZkCache {
 	}
 	
 	public static ZkManager get(String key){
+		ZkManager manager = _cache.get(key);
+		if(manager == null){
+			ZkCache.init(ZkCfgFactory.createZkCfgManager());
+		}
 		return _cache.get(key);
 	}
 	

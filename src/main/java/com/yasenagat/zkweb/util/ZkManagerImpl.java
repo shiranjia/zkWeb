@@ -10,7 +10,7 @@ import org.apache.zookeeper.ZooDefs.Perms;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Stat;
-import org.h2.util.StringUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 
@@ -100,7 +100,7 @@ public class ZkManagerImpl implements Watcher,ZkManager {
 			log.error("zk is not init");
 		}
 		return false;
-	};
+	}
 
 	public List<String> getChildren(String path){
 
@@ -109,7 +109,7 @@ public class ZkManagerImpl implements Watcher,ZkManager {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return new ArrayList<String>();
+		return new ArrayList();
 	}
 
 	public String getData(String path,String charset) {
@@ -120,7 +120,7 @@ public class ZkManagerImpl implements Watcher,ZkManager {
 				if(null == b){
 					return "";
 				}
-				if(StringUtils.isNullOrEmpty(charset)){
+				if(StringUtils.isEmpty(charset)){
 					charset = "UTF-8";
 				}
 				log.info("data : "+new String(zk.getData(path, false, s),charset));
