@@ -12,12 +12,15 @@ import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Stat;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.util.*;
 
 public class ZkManagerImpl implements Watcher,ZkManager {
 
 	private ZooKeeper zk;
 	private final String ROOT = "/";
+	private String host;
+	private int timeout;
 	private static final Log log = LogFactory.getLog(ZkManagerImpl.class);
 //	private static final ZkManagerImpl _instance = new ZkManagerImpl();
 	public ZkManagerImpl(){
@@ -29,28 +32,28 @@ public class ZkManagerImpl implements Watcher,ZkManager {
 		return new ZkManagerImpl();
 	}
 
-//	public boolean connect(Properties p) {
-//
-//		try {
-//			return this.connect(p.getProperty(P.host.toString()), (Integer
-//					.valueOf(p.getProperty(P.sessionTimeOut.toString()))));
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return false;
-//		}
-//	};
-//
-//	private boolean connect(String host, int timeout) {
-//		try {
-//			if (null == zk) {
-//				zk = new ZooKeeper(host, timeout, this);
-//			}
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return false;
-//		}
-//		return true;
-//	}
+	/*public boolean connect(Properties p) {
+
+		try {
+			return this.connect(p.getProperty(P.host.toString()), (Integer
+					.valueOf(p.getProperty(P.sessionTimeOut.toString()))));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	};
+
+	private boolean connect(String host, int timeout) {
+		try {
+			if (null == zk) {
+				zk = new ZooKeeper(host, timeout, this);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}*/
 	
 	public ZkManagerImpl connect() {
 
@@ -78,7 +81,9 @@ public class ZkManagerImpl implements Watcher,ZkManager {
 	public ZkManagerImpl connect(String host, int timeout) {
 		try {
 //			if (null == zk) {
-				zk = new ZooKeeper(host, timeout, this);
+			this.host = host;
+			this.timeout = timeout;
+			this.zk = new ZooKeeper(host, timeout, this);
 //			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -105,6 +110,7 @@ public class ZkManagerImpl implements Watcher,ZkManager {
 	public List<String> getChildren(String path){
 
 		try {
+			createZooKeeper();
 			return zk.getChildren(path == null ? ROOT : path, false);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -114,6 +120,7 @@ public class ZkManagerImpl implements Watcher,ZkManager {
 
 	public String getData(String path,String charset) {
 		try {
+			createZooKeeper();
 			Stat s = zk.exists(path, false);
 			if (s != null) {
 				byte b[] = zk.getData(path, false, s);
@@ -138,6 +145,7 @@ public class ZkManagerImpl implements Watcher,ZkManager {
 			if (nodePath.length() == 0) {
 				nodePath = ROOT;
 			}
+			createZooKeeper();
 			Stat s = zk.exists(nodePath, false);
 			if (s != null) {
 				nodeMeta.put(Meta.aversion.toString(),
@@ -176,6 +184,7 @@ public class ZkManagerImpl implements Watcher,ZkManager {
 			if (nodePath.length() == 0) {
 				nodePath = ROOT;
 			}
+			createZooKeeper();
 			Stat s = zk.exists(nodePath, false);
 			if (s != null) {
 				List<ACL> acls = zk.getACL(nodePath, s);
@@ -231,6 +240,7 @@ public class ZkManagerImpl implements Watcher,ZkManager {
 
 	public boolean createNode(String path, String nodeName,String data) {
 		try {
+			createZooKeeper();
 			String p;
 			if(ROOT.equals(path)){
 				p = path + nodeName;
@@ -253,6 +263,7 @@ public class ZkManagerImpl implements Watcher,ZkManager {
 
 	public boolean deleteNode(String nodePath) {
 		try {
+			createZooKeeper();
 			Stat s = zk.exists(nodePath, false);
 			if (s != null) {
 				List<String> children = zk.getChildren(nodePath, false);
@@ -272,6 +283,7 @@ public class ZkManagerImpl implements Watcher,ZkManager {
 
 	public boolean setData(String nodePath, String data) {
 		try {
+			createZooKeeper();
 			zk.setData(nodePath, data.getBytes("utf-8"), -1);
 			return true;
 		} catch (Exception e) {
@@ -288,6 +300,7 @@ public class ZkManagerImpl implements Watcher,ZkManager {
 	public long getNodeId(String nodePath) {
 		
 		try {
+			createZooKeeper();
 			Stat s = zk.exists(nodePath, false);
 			if(s != null){
 				return s.getPzxid();
@@ -297,6 +310,16 @@ public class ZkManagerImpl implements Watcher,ZkManager {
 		} 
 
 		return 0l;
+	}
+
+	protected void createZooKeeper(){
+		if(zk.getState().equals(ZooKeeper.States.CLOSED)){
+			try {
+				zk = new ZooKeeper(host,timeout,this);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 
